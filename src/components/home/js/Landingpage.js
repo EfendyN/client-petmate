@@ -1,14 +1,10 @@
 import React, { Component } from "react";
+
+import { connect } from "react-redux";
+import { getSpecies } from "../../../_actions/species";
+
 import "../css/landingpage.css";
-import {
-  Button,
-  Modal,
-  Image,
-  Form,
-  InputGroup,
-  Dropdown,
-  DropdownButton
-} from "react-bootstrap";
+import { Button, Modal, Image, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import image from "../svg/pet.svg";
 import rectangle from "../svg/Rectangle.svg";
@@ -23,35 +19,40 @@ class landingpage extends Component {
       regModal: false
     };
 
-    this.openModalLogin = this.openModalLogin.bind(this);
-    this.closeModalLogin = this.closeModalLogin.bind(this);
-
-    this.openModalReg = this.openModalReg.bind(this);
-    this.closeModalReg = this.closeModalReg.bind(this);
+    // this.openModalLogin = this.openModalLogin.bind(this);
+    // this.closeModalLogin = this.closeModalLogin.bind(this);
+    // this.openModalReg = this.openModalReg.bind(this);
+    // this.closeModalReg = this.closeModalReg.bind(this);
   }
 
-  openModalLogin() {
+  componentDidMount() {
+    this.props.getSpecies();
+  }
+
+  openModalLogin = () => {
     this.setState({
       modalLogin: true
     });
-  }
-  closeModalLogin() {
+  };
+  closeModalLogin = () => {
     this.setState({
       modalLogin: false
     });
-  }
-  openModalReg() {
+  };
+  openModalReg = () => {
     this.setState({
       regModal: true
     });
-  }
-  closeModalReg() {
+  };
+  closeModalReg = () => {
     this.setState({
       regModal: false
     });
-  }
+  };
 
   render() {
+    const { data, loading, error } = this.props.species;
+    if (error) return <h1>There's an unknown error occured.</h1>;
     return (
       <div>
         <section>
@@ -65,10 +66,14 @@ class landingpage extends Component {
                 <button onClick={this.openModalLogin} className="loginButton">
                   Login
                 </button>
-                <Modal size="sm" show={this.state.modalLogin}>
+                <Modal
+                  className="modal-login"
+                  size="sm"
+                  show={this.state.modalLogin}
+                >
                   <Modal.Header>
                     <Modal.Title
-                      class="modalLogin"
+                      class="titleModalLogin"
                       id="contained-modal-title-vcenter"
                     >
                       Login
@@ -111,10 +116,14 @@ class landingpage extends Component {
             in our <u>Privacy Policy</u> and <u>Cookie Policy.</u>
           </div>
           <div className="main-text-child2">Find your Pet's Match</div>
-          <Modal size="sm" show={this.state.regModal}>
+          <Modal
+            className="modal-register"
+            size="sm"
+            show={this.state.regModal}
+          >
             <Modal.Header>
               <Modal.Title
-                class="modalRegister"
+                class="titleModalRegister"
                 id="contained-modal-title-vcenter"
               >
                 Register
@@ -144,18 +153,16 @@ class landingpage extends Component {
                   <Form.Control type="text" placeholder="Gender" />
                 </Form.Group>
                 <Form.Group>
-                  <DropdownButton
-                    as={InputGroup.Append}
-                    variant="outline-secondary"
-                    title="Spesies"
-                    id="input-group-dropdown-2"
-                    className="btnSpesies"
-                  >
-                    <Dropdown.Item href="#">Action</Dropdown.Item>
-                    <Dropdown.Item href="#">Another action</Dropdown.Item>
-                    <Dropdown.Item href="#">Something else here</Dropdown.Item>
-                    <Dropdown.Item href="#">Separated link</Dropdown.Item>
-                  </DropdownButton>
+                  <select className="select-spesies">
+                    <option selected disabled>
+                      spesies pet
+                    </option>
+                    {data.map((item, index) => (
+                      <option className="option-spesies" key={index}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
                 </Form.Group>
                 <Form.Group>
                   <Form.Control type="text" placeholder="Age Pet" />
@@ -180,4 +187,16 @@ class landingpage extends Component {
   }
 }
 
-export default landingpage;
+const mapStateToProps = state => {
+  return {
+    species: state.species
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    getSpecies: () => dispatch(getSpecies())
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(landingpage);
